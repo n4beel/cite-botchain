@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import Link from "next/link";
 import { formatEther } from "viem";
 import {
@@ -95,9 +95,17 @@ export default function MePage() {
     error: withdrawError,
   } = useWriteContract();
 
-  const { isLoading: isWithdrawWaiting } = useWaitForTransactionReceipt({
-    hash: withdrawTxHash,
-  });
+  const { isLoading: isWithdrawWaiting, isSuccess: isWithdrawSuccess } =
+    useWaitForTransactionReceipt({
+      hash: withdrawTxHash,
+    });
+
+  useEffect(() => {
+    if (isWithdrawSuccess) {
+      toast("success", "Citation royalties successfully withdrawn!");
+      refetchPending();
+    }
+  }, [isWithdrawSuccess, refetchPending, toast]);
 
   const handleWithdraw = () => {
     if (!isConnected) return;

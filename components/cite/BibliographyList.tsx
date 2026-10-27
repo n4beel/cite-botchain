@@ -65,6 +65,7 @@ export default function BibliographyList({
             return (
               <div
                 key={work.id.toString()}
+                data-bib-id={work.id.toString()}
                 onClick={() => onSelect(work.id)}
                 className={`p-3.5 rounded-[4px] border transition-all cursor-pointer text-left ${
                   isSelected

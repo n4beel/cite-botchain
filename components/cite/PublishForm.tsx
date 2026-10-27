@@ -353,6 +353,7 @@ export default function PublishForm({
                   return (
                     <div
                       key={w.id.toString()}
+                      data-cite-id={w.id.toString()}
                       onClick={() => toggleCite(w.id)}
                       className={`p-2.5 rounded-[4px] border transition-all cursor-pointer flex items-center justify-between text-[12px] ${
                         isCited
