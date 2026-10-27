@@ -18,6 +18,14 @@ evm_version = "paris"
 line_length = 100
 tab_width = 2
 
+[fuzz]
+runs = 256
+
+[invariant]
+runs = 256
+depth = 128
+fail_on_revert = false
+
 [rpc_endpoints]
 botchain = "${BOTCHAIN_RPC_URL}"
 bohr = "${BOHR_RPC_URL}"
