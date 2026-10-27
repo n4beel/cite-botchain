@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes, forwardRef, ReactNode } from "react";
 
-export type ButtonVariant = "primary" | "scholarly" | "footnote" | "subtle" | "danger";
+export type ButtonVariant = "primary" | "scholarly" | "footnote" | "subtle" | "ghost" | "secondary" | "danger";
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -22,6 +22,10 @@ const variantStyles: Record<ButtonVariant, string> = {
     "bg-[#FAF7FF] text-[#5B4A78] border border-[#D9CCF0] hover:border-[#B5179E] hover:text-[#B5179E] font-mono text-[11px]",
   subtle:
     "bg-transparent text-[#5B4A78] hover:text-[#1E1233] hover:bg-[#F3EAFF] border border-transparent",
+  ghost:
+    "bg-transparent text-[#5B4A78] hover:text-[#1E1233] hover:bg-[#F3EAFF] border border-transparent",
+  secondary:
+    "bg-[#F3EAFF] text-[#1E1233] border border-[#D9CCF0] hover:border-[#B5179E]",
   danger:
     "bg-transparent text-[#B3261E] border border-[#B3261E] hover:bg-[#FCE8E6]",
 };
