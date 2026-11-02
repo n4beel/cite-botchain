@@ -3,32 +3,25 @@
 import { useMemo, useEffect } from "react";
 import Link from "next/link";
 import { formatEther } from "viem";
-import {
-  useAccount,
-  useReadContract,
-  useReadContracts,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useChainId,
-} from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
+import { useWaitForTransactionReceipt } from "@/lib/useChainWrite";
+import { useWriteContract } from "@/lib/useChainWrite";
 import PageShell from "@/components/layout/PageShell";
 import Panel from "@/components/ui/Panel";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { citeAbi } from "@/lib/botchain/abi";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
-import { type BotChainId, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain } from "@/lib/botchain/chain";
 import { describeError } from "@/lib/errors";
 import { formatFee, refLabel, type WorkData } from "@/lib/cite";
 
 export default function MePage() {
   const { address, isConnected } = useAccount();
-  const chainId = useChainId();
   const { toast } = useToast();
 
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
 
   // 1. Read user's pending balance
   const {

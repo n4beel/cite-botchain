@@ -4,12 +4,12 @@ import { use, useMemo } from "react";
 import Link from "next/link";
 import { isAddress, type Address } from "viem";
 import { notFound } from "next/navigation";
-import { useReadContract, useReadContracts, useChainId } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import PageShell from "@/components/layout/PageShell";
 import Panel from "@/components/ui/Panel";
 import { citeAbi } from "@/lib/botchain/abi";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
-import { type BotChainId, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain } from "@/lib/botchain/chain";
 import { formatFee, refLabel, truncateHash, type WorkData } from "@/lib/cite";
 
 interface AuthorPageProps {
@@ -24,10 +24,8 @@ export default function AuthorPage({ params }: AuthorPageProps) {
   }
 
   const authorAddress = rawAddress as Address;
-  const chainId = useChainId();
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
 
   // 1. Read author work IDs
   const { data: workIdsRaw, isLoading: isIdsLoading } = useReadContract({

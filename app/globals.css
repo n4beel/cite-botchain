@@ -9,37 +9,43 @@
   --font-sans: var(--font-sans), "Work Sans", system-ui, sans-serif;
   --font-mono: var(--font-mono), "Source Code Pro", ui-monospace, monospace;
 
-  --radius: 3px;
-  --radius-sm: 2px;
+  --radius-xs: 2px;
+  --radius-sm: 3px;
   --radius-md: 4px;
   --radius-lg: 6px;
 }
 
-/**
- * Design tokens for Archetype AF · Bibliography.
- * Ground: Pale lilac-white (#FAF7FF)
- * Ink: Deep violet (#1E1233)
- * Accent: Scholarly magenta (#B5179E)
- */
+/* -------------------------------------------------------------------------- */
+/* Archetype AF · Bibliography Tokens                                         */
+/* -------------------------------------------------------------------------- */
 :root {
+  /* Canvas & Containers */
   --bg-base: #FAF7FF;
   --bg-surface: #FFFFFF;
   --bg-elevated: #F3EAFF;
   --bg-overlay: #ECE3FA;
+
+  /* Architectural Borders */
   --border-subtle: #ECE3FA;
   --border-default: #D9CCF0;
   --border-strong: #B5179E;
+
+  /* Typography Hierarchies */
   --text-primary: #1E1233;
   --text-secondary: #5B4A78;
   --text-tertiary: #8472A3;
   --text-muted: #5B4A78;
+
+  /* Brand Accent */
   --accent: #B5179E;
   --accent-ink: #FFFFFF;
+
+  /* States */
   --success: #1F7A3D;
   --warning: #8A5A00;
   --danger: #B3261E;
 
-  /* Wallet menu: opaque, contrast-checked (scripts/check-ui-contract.py) */
+  /* Wallet menu: opaque, contrast-checked */
   --menu-bg: #FFFFFF;
   --menu-fg: #1E1233;
   --menu-muted: #5B4A78;
@@ -48,110 +54,82 @@
   --menu-danger: #B3261E;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Base Elements & Academic Typesetting                                       */
+/* -------------------------------------------------------------------------- */
 @layer base {
-  * {
+  *, *::before, *::after {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
   }
 
   html {
-    height: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 
   body {
-    background: var(--bg-base);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-color: var(--bg-base);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    min-height: 100%;
+    letter-spacing: -0.01em;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  a {
-    color: inherit;
-  }
-}
-
-/* Touch targets */
-@media (pointer: coarse) {
-  button,
-  [role="button"],
-  a.nav-link,
-  select,
-  label[for] {
-    min-height: 44px;
+  h1, h2, h3, h4, .serif-heading {
+    font-family: var(--font-serif);
+    font-feature-settings: "liga" 1, "kern" 1;
+    color: var(--text-primary);
   }
 
-  input,
-  textarea {
-    font-size: 16px;
+  code, pre, .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 }
 
-html,
-body {
-  overflow-x: hidden;
+/* -------------------------------------------------------------------------- */
+/* Archetype AF Primitives: Bibliography Layout & Citation Tree Nodes         */
+/* -------------------------------------------------------------------------- */
+.bibliography-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
 }
 
-::selection {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
+@media (min-width: 1024px) {
+  .bibliography-grid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
 }
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-base);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 2px;
-}
-
-.mono {
+.citation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs);
   font-family: var(--font-mono);
-  letter-spacing: 0;
+  font-size: 0.72rem;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Toast animations */
-@keyframes slideIn {
-  from { transform: translateX(8px); opacity: 0; }
-  to   { transform: translateX(0);   opacity: 1; }
-}
-@keyframes swipeOut {
-  to { transform: translateX(100%); opacity: 0; }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-surface) 25%,
-    var(--bg-elevated) 50%,
-    var(--bg-surface) 75%
-  );
-  background-size: 800px 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
-  border-radius: 2px;
+.footnote-ref {
+  vertical-align: super;
+  font-size: 0.75em;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--accent);
+  margin-left: 0.15rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Archetype AF · Bibliography Custom Layout & Tree Classes */
 .tree-stem {
   position: relative;
   padding-left: 1.5rem;
@@ -179,7 +157,74 @@ body {
   background: var(--border-default);
 }
 
-.scholarly-ref {
-  font-family: var(--font-mono);
-  font-feature-settings: "tnum" 1;
+.scholarly-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(30, 18, 51, 0.04);
+  transition: border-color 0.15s ease;
+}
+
+.scholarly-card:hover {
+  border-color: var(--border-strong);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Focus, Text Selection & Scrollbars                                         */
+/* -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #E8D3F5;
+  color: #1E1233;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Touch density guard */
+@media (pointer: coarse) {
+  button, [role="button"], a.nav-link, select, label[for] {
+    min-height: 44px;
+  }
+  input, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Shimmer pulse */
+@keyframes shimmer {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.5; }
+}
+
+.skeleton {
+  background: var(--bg-elevated);
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

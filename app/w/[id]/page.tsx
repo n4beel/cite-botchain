@@ -3,13 +3,13 @@
 import { use, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { useReadContract, useChainId, usePublicClient } from "wagmi";
+import { useReadContract, usePublicClient } from "wagmi";
 import PageShell from "@/components/layout/PageShell";
 import CitationTree from "@/components/cite/CitationTree";
 import Panel from "@/components/ui/Panel";
 import { citeAbi } from "@/lib/botchain/abi";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
-import { type BotChainId, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain } from "@/lib/botchain/chain";
 import { foldCitedBy, refLabel, type WorkData } from "@/lib/cite";
 import { parsePublishedLog, type PublishedEvent } from "@/lib/logs";
 
@@ -21,11 +21,9 @@ export default function WorkPage({ params }: WorkPageProps) {
   const { id: rawId } = use(params);
   const workId = Number(rawId);
 
-  const chainId = useChainId();
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
-  const publicClient = usePublicClient();
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
+  const publicClient = usePublicClient({ chainId: activeBotChain.id }); // stable-hook-result
 
   const [publishedLogs, setPublishedLogs] = useState<PublishedEvent[]>([]);
   const [isScanningLogs, setIsScanningLogs] = useState(false);

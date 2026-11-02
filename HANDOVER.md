@@ -154,3 +154,42 @@ Anvil dev accounts used across tests and local stack (Chain ID 968, Port 8727):
 | Author C (Charlie) | `0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC` | Author of Work 3 (cites 2) and Work 6 (cites 1, 4, 5) |
 | Author D (Dave) | `0x90F79bf6EB2c4f870365E785982E1f101E93b906` | Author of Work 7 (cites 1, 3) and Capstone Work 9 (cites 1..8) |
 | Outsider (Eve) | `0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65` | Author of Work 8, published new Work 10 in live walkthrough |
+
+---
+
+## Feedback round 1 (Part A Remediation)
+
+### 1. Network Pinning & Transaction Layer
+- Integrated `lib/useChainWrite.ts` and `test/lint/chain-write-pinned.test.ts`. Writes are strictly pinned to `activeBotChain.id`.
+- Mounted `<WrongNetworkBar />` inside `ToastProvider` in `app/layout.tsx`.
+- Updated `components/botchain/NetworkBadge.tsx` with clickable switch button when connected to mismatched networks, with title and accessibility attributes matching Vouch.
+- Aligned `lib/errors.ts` `describeError` to match Vouch's chain mismatch message: `"Your wallet is on a different network. Switch it to <activeBotChain.name>, then try again."`.
+- Pinned all `usePublicClient` calls and contract deployments to `activeBotChain.id` across all routes (`app/page.tsx`, `app/publish/page.tsx`, `app/me/page.tsx`, `app/w/[id]/page.tsx`, `app/a/[address]/page.tsx`).
+
+### 2. Amount Inputs & Decimal Handling
+- In `components/cite/PublishForm.tsx`, configured fee input to `type="number" step="any"` with in-app validation for non-negative values, non-empty, and capped at contract constant `MAX_FEE` (1.0 BOT).
+
+### 3. Distinct Styling & Archetype AF Identity
+- Restructured `app/globals.css` with bespoke styles for bibliography ledger, citation chips, footnote references, and scholarly card containers.
+- Reduced similarity to template from 0.75 down to **0.356** (threshold $\le 0.70$).
+- `python3 scripts/check-distinct.py cite` exits 0 with no warnings.
+
+### 4. Deploy Script Verification
+- `contracts/script/Deploy.s.sol` wired to deploy `new Cite()`.
+- Verified execution with `./deploy.sh` on local anvil: deployed non-zero contract address with valid bytecode confirmed via `cast code`.
+
+### 5. Invariant & Protocol Limits
+- `foundry.toml` configured with `[invariant] runs = 256, depth = 128, fail_on_revert = false`.
+- `README.md` updated with exact protocol limits taken from contract constants (`MAX_CITES = 8`, `MAX_FEE = 1 ether`, `MAX_TITLE = 64`, `MAX_BATCH_VIEW = 50`).
+
+### 6. Gates & Test Suite
+- `python3 scripts/check-ui-contract.py cite`: PASSED (0 findings)
+- `python3 scripts/check-tokens.py cite`: PASSED (0 undefined tokens)
+- `python3 scripts/check-honesty.py cite`: PASSED (0 findings)
+- `python3 scripts/check-distinct.py cite`: PASSED (0 problem pairs)
+- `forge test`: 21 passed (19 unit/fuzz, 2 invariant at 256 runs $\times$ 128 depth)
+- `python3 scripts/mutation-check.py cite`: 21 of 25 killed, 4 surviving equivalent mutants documented in `contracts/DECISIONS.md`
+- `npm test`: 10 passed (63 unit and lint tests)
+- `npx tsc --noEmit`: 0 errors
+- `npm run test:integration`: 2 passed (14 integration tests)
+

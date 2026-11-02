@@ -17,6 +17,12 @@ Cite is a decentralized academic and technical citation ledger built on BOT Chai
 - **No Sybil-Proof Citation Inflation:** Anyone can generate fresh wallets and pay to cite their own works to inflate citation counts. Readers must inspect *who* cites a work, not simply the raw count.
 - **Immutable Citations:** Once published, citations cannot be retracted, updated, or deleted.
 
+## Protocol Limits (from contract constants)
+- `MAX_CITES = 8`: Maximum 8 earlier works cited per publication.
+- `MAX_FEE = 1 ether` (1.0 BOT): Maximum citation royalty fee an author can set.
+- `MAX_TITLE = 64` bytes: Maximum length of document title.
+- `MAX_BATCH_VIEW = 50`: Maximum number of items returned in `latest` view.
+
 ## Gas Profile
 Measured with Solc 0.8.23 via Foundry:
 

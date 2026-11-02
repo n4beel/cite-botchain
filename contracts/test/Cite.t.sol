@@ -534,6 +534,9 @@ contract CiteTest is Test {
             eightCites[i] = i + 1;
         }
 
+        uint256 q = cite.quote(eightCites, bob);
+        assertEq(q, 0);
+
         vm.prank(bob);
         uint256 id = cite.publish(hash1, "Eight Cites Paper", eightCites, 0);
         assertEq(id, 9);

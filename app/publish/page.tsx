@@ -2,13 +2,13 @@
 
 import { useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useReadContract, useChainId } from "wagmi";
+import { useReadContract } from "wagmi";
 import PageShell from "@/components/layout/PageShell";
 import PublishForm from "@/components/cite/PublishForm";
 import Panel from "@/components/ui/Panel";
 import { citeAbi } from "@/lib/botchain/abi";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
-import { type BotChainId, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain } from "@/lib/botchain/chain";
 import type { WorkData } from "@/lib/cite";
 
 function PublishContent() {
@@ -16,10 +16,8 @@ function PublishContent() {
   const citeParam = searchParams.get("cite");
   const initialCiteId = citeParam ? BigInt(citeParam) : undefined;
 
-  const chainId = useChainId();
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
 
   // Read latest works for citation picker
   const { data: latestRaw, isLoading } = useReadContract({

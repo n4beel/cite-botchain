@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useReadContract, useChainId, usePublicClient } from "wagmi";
+import { useReadContract, usePublicClient } from "wagmi";
 import PageShell from "@/components/layout/PageShell";
 import BibliographyList from "@/components/cite/BibliographyList";
 import CitationTree from "@/components/cite/CitationTree";
@@ -10,16 +10,14 @@ import Button from "@/components/ui/Button";
 import Panel from "@/components/ui/Panel";
 import { citeAbi } from "@/lib/botchain/abi";
 import { getDeployment, isDeployed } from "@/lib/botchain/deployment";
-import { type BotChainId, isBotChainId } from "@/lib/botchain/chain";
+import { activeBotChain } from "@/lib/botchain/chain";
 import { foldCitedBy, type WorkData } from "@/lib/cite";
 import { parsePublishedLog, type PublishedEvent } from "@/lib/logs";
 
 export default function HomePage() {
-  const chainId = useChainId();
-  const currentChainId: BotChainId = isBotChainId(chainId) ? chainId : 968;
-  const deployment = getDeployment(currentChainId);
-  const deployed = isDeployed(currentChainId);
-  const publicClient = usePublicClient();
+  const deployment = getDeployment(activeBotChain.id);
+  const deployed = isDeployed(activeBotChain.id);
+  const publicClient = usePublicClient({ chainId: activeBotChain.id }); // stable-hook-result
 
   const [selectedId, setSelectedId] = useState<bigint | null>(null);
   const [publishedLogs, setPublishedLogs] = useState<PublishedEvent[]>([]);

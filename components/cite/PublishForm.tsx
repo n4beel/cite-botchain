@@ -4,13 +4,9 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseEther, formatEther, type Address } from "viem";
-import {
-  useAccount,
-  useBalance,
-  useReadContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useAccount, useBalance, useReadContract } from "wagmi";
+import { useWaitForTransactionReceipt } from "@/lib/useChainWrite";
+import { useWriteContract } from "@/lib/useChainWrite";
 import Button from "@/components/ui/Button";
 import Panel from "@/components/ui/Panel";
 import { useToast } from "@/components/ui/Toast";
@@ -38,7 +34,7 @@ export default function PublishForm({
   deploymentAddress,
   initialCiteId,
 }: PublishFormProps) {
-  const router = useRouter();
+  const { push: routerPush } = useRouter();
   const { toast } = useToast();
   const { address, isConnected } = useAccount();
   const { data: balanceData } = useBalance({ address });
@@ -71,14 +67,22 @@ export default function PublishForm({
   // Parse fee
   let parsedFee = 0n;
   let isFeeValid = false;
+  let feeError = "";
   try {
     if (feeBot.trim() !== "") {
       parsedFee = parseEther(feeBot);
-      if (parsedFee >= 0n && parsedFee <= MAX_FEE) {
+      if (parsedFee < 0n) {
+        feeError = "Fee must be greater than or equal to 0.";
+      } else if (parsedFee > MAX_FEE) {
+        feeError = "Fee cannot exceed 1.0 BOT.";
+      } else {
         isFeeValid = true;
       }
+    } else {
+      feeError = "Citation fee is required (0 for free).";
     }
   } catch {
+    feeError = "Please enter a valid BOT amount.";
     isFeeValid = false;
   }
 
@@ -204,14 +208,14 @@ export default function PublishForm({
         const parsed = parsePublishedLog(log);
         if (parsed) {
           toast("success", `Work [${parsed.id.toString()}] published!`);
-          router.push(`/w/${parsed.id.toString()}`);
+          routerPush(`/w/${parsed.id.toString()}`);
           return;
         }
       }
       toast("success", "Publication confirmed on-chain!");
-      router.push("/");
+      routerPush("/");
     }
-  }, [isPublishSuccess, receipt, router, toast]);
+  }, [isPublishSuccess, receipt, routerPush, toast]);
 
   return (
     <div className="max-w-[760px] mx-auto flex flex-col gap-8">
@@ -318,7 +322,10 @@ export default function PublishForm({
             </p>
             <div className="flex items-center gap-3">
               <input
-                type="text"
+                type="number"
+                step="any"
+                min="0"
+                max="1"
                 value={feeBot}
                 onChange={(e) => setFeeBot(e.target.value)}
                 placeholder="0.05"
@@ -326,6 +333,9 @@ export default function PublishForm({
               />
               <span className="font-mono text-[13px] text-[#5B4A78]">BOT</span>
             </div>
+            {feeError && feeBot.trim() !== "" && (
+              <p className="mt-1.5 text-[12px] text-[#B3261E] font-medium">{feeError}</p>
+            )}
           </div>
 
           {/* 4. Citations Selection */}

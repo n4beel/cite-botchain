@@ -71,34 +71,17 @@ This document records the architectural, security, and algorithmic decisions mad
 
 ## 4. Mutation Testing Results
 
-A total of 25 mutants were systematically introduced into `contracts/src/Cite.sol` and evaluated against the test suite:
+Evaluated via `python3 scripts/mutation-check.py cite`:
+- **Evaluated**: 25 mutants tested
+- **Killed**: 21 mutants killed
+- **Surviving**: 4 equivalent mutants (100% of functional mutants killed)
 
-| Mutant ID | Description | Result | Rationale / Notes |
-|---|---|---|---|
-| `M01` | Invert `contentHash == bytes32(0)` check | **KILLED** | Caught by `test_InputValidations` |
-| `M02` | Invert `idOfHash[contentHash] != 0` check | **KILLED** | Caught by `test_DuplicateHashRevertsArgsId` |
-| `M03` | Invert `bytes(title).length == 0` check | **KILLED** | Caught by `test_InputValidations` |
-| `M04` | Change `title.length > MAX_TITLE` to `>=` | **KILLED** | Caught by `test_Exact64ByteTitleAllowed` |
-| `M05` | Change `fee > MAX_FEE` to `>=` | **KILLED** | Caught by `test_FeeCapEnforced` |
-| `M06` | Change `cites.length > MAX_CITES` to `>=` | **KILLED** | Caught by `test_ExactEightCitationsAllowed` |
-| `M07` | Change `cId > workCount` to `>=` | **KILLED** | Caught by `testFuzz_NoCycles` |
-| `M08` | Skip `cId > workCount` check | **KILLED** | Caught by `test_UnknownCitationReverts` |
-| `M09` | Invert duplicate citation check (`==` to `!=`) | **KILLED** | Caught by `test_DuplicateCitationRevertsArgsId` |
-| `M10` | Invert self-citation fee check (`!=` to `==`) | **KILLED** | Caught by `test_SelfCitationIsFreeAndNotCredited` |
-| `M11` | Remove fee accumulation `owed += cited.fee` | **KILLED** | Caught by `test_CitationPaysAuthors` |
-| `M12` | Invert `msg.value != owed` check (`!=` to `==`) | **KILLED** | Caught by `test_WrongPaymentReverts` |
-| `M13` | Change `id = ++workCount` to `workCount++` (0-indexed) | **KILLED** | Caught by `test_PublishWithoutCitations_NoPayment` |
-| `M14` | Remove `idOfHash[contentHash] = id` assignment | **KILLED** | Caught by `test_DuplicateHashRevertsArgsId` |
-| `M15` | Remove `_works[cId].citedBy += 1` increment | **KILLED** | Caught by `test_CitedByCounts` |
-| `M16` | Credit pending to self on self-citation | **KILLED** | Caught by `test_SelfCitationIsFreeAndNotCredited` |
-| `M17` | Decrement pending fee instead of increment | **KILLED** | Caught by `test_CitationPaysAuthors` |
-| `M18` | Remove `nonReentrant` modifier from `withdraw` | **KILLED** | Caught by `test_ReentrantWithdrawBlocked` |
-| `M19` | Invert `amount == 0` check in `withdraw` | **KILLED** | Caught by `test_InputValidations` |
-| `M20` | Zero pending balance after external call | **SURVIVED** | *Equivalent (Defense-in-Depth)*: The `nonReentrant` modifier already blocks any reentrancy into `withdraw()` before the body can be executed. Both CEI and `nonReentrant` are preserved. |
-| `M21` | Invert `!success` check in `withdraw` | **KILLED** | Caught by `test_CitationPaysAuthors` |
-| `M22` | Remove `MAX_CITES` check in `quote` | **KILLED** | Caught by `test_NineCitationsRevert` |
-| `M23` | Remove `BadCitation` range check in `quote` | **KILLED** | Caught by `test_UnknownCitationReverts` |
-| `M24` | Remove duplicate citation check in `quote` | **KILLED** | Caught by `test_DuplicateCitationRevertsArgsId` |
-| `M25` | Invert author check in `quote` (`!=` to `==`) | **KILLED** | Caught by `test_QuoteMatchesRequirement` |
-
-**Summary:** 24 killed / 1 survived (equivalent defense-in-depth). Effective kill rate: **100% of non-equivalent mutants**.
+Surviving equivalent mutants documented:
+1. `Cite.sol:151 if (cited.author != msg.sender && cited.fee > 0)` $\to$ `fee >= 0`:
+   `fee` is a non-negative `uint128`. When `fee == 0`, executing `authorDues[cited.author] += 0` is an arithmetic identity no-op.
+2. `Cite.sol:235 uint256 n = count > available ? available : count;` $\to$ `count >= available`:
+   When `count == available`, both branches evaluate to `available`.
+3. `Cite.sol:229 if (count > MAX_BATCH_VIEW) count = MAX_BATCH_VIEW;` $\to$ `count >= MAX_BATCH_VIEW`:
+   When `count == MAX_BATCH_VIEW`, assigning `MAX_BATCH_VIEW` is an identity assignment.
+4. `Cite.sol:230 if (workCount == 0 || offset >= workCount)` $\to$ `offset > workCount`:
+   When `offset == workCount`, `available = workCount - offset = 0`, producing `n = 0` and an identical empty dynamic return array.
